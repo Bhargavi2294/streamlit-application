@@ -1,0 +1,29 @@
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import make_pipeline
+import joblib
+
+# Sample data
+data = pd.DataFrame({
+    'product_category': ['Electronics', 'Clothing', 'Books'],
+    'customer_location': ['Mumbai', 'Delhi', 'Chennai'],
+    'shipping_method': ['Express', 'Standard', 'Same-Day'],
+    'delivery_time': [2, 5, 1]  # target variable
+})
+
+# Feature matrix and target
+X = data.drop(columns='delivery_time')
+y = data['delivery_time']
+
+# Encoding + model pipeline
+model = make_pipeline(
+    OneHotEncoder(handle_unknown='ignore'),
+    RandomForestRegressor()
+)
+
+# Train the model
+model.fit(X, y)
+
+# Save to .pkl
+joblib.dump(model, "delivery_model.pkl")
