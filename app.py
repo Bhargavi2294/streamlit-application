@@ -1,33 +1,38 @@
 import streamlit as st
-
-import streamlit as st
 import pandas as pd
-import joblib
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import make_pipeline
 
-# Load your trained model (make sure delivery_model.pkl is in the same directory)
-model = joblib.load("voting_model.pkl")
+# --- Train a mini model with dummy data ---
+data = pd.DataFrame({
+    "product_category": ["Electronics", "Clothing", "Books"],
+    "customer_location": ["Mumbai", "Delhi", "Chennai"],
+    "shipping_method": ["Express", "Standard", "Same-Day"],
+    "delivery_time": [2, 5, 1]
+})
 
-st.title("🚚 Timelytics: Predict Order Delivery Time")
+X = data.drop("delivery_time", axis=1)
+y = data["delivery_time"]
 
-# User Inputs
-category = st.selectbox("Select Product Category", ["Electronics", "Clothing", "Groceries", "Books"])
-location = st.text_input("Enter Customer Location (e.g., City or Zip Code)")
-shipping_method = st.selectbox("Select Shipping Method", ["Standard", "Express", "Same-Day"])
+model = make_pipeline(
+    OneHotEncoder(handle_unknown="ignore"),
+    RandomForestRegressor()
+)
+model.fit(X, y)
 
-# Optional: Add other inputs your model needs (e.g., distance, weight)
-# For simplicity, let’s assume the model can handle text features or they are encoded inside
+# --- Streamlit UI ---
+st.title("🚛 Timelytics (No .pkl Required!)")
 
-# Prediction trigger
+category = st.selectbox("Product Category", X['product_category'].unique())
+location = st.text_input("Customer Location")
+shipping = st.selectbox("Shipping Method", X['shipping_method'].unique())
+
 if st.button("Predict Delivery Time"):
     input_data = pd.DataFrame({
         "product_category": [category],
         "customer_location": [location],
-        "shipping_method": [shipping_method]
+        "shipping_method": [shipping]
     })
-
-    try:
-        prediction = model.predict(input_data)[0]
-        st.success(f"📦 Estimated Delivery Time: {prediction} day(s)")
-    except Exception as e:
-        st.error(f"⚠️ Error during prediction: {e}")
-
+    prediction = model.predict(input_data)[0]
+    st.success(f"🕒 Estimated Delivery Time: {prediction:.1f} day(s)")
