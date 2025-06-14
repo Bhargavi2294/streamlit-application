@@ -5,7 +5,7 @@ import pandas as pd
 import joblib
 
 # Load your trained model (make sure delivery_model.pkl is in the same directory)
-model = joblib.load("delivery_model.pkl")
+model = joblib.load("voting_model.pkl")
 
 st.title("🚚 Timelytics: Predict Order Delivery Time")
 
